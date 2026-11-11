@@ -299,8 +299,10 @@ private fun DetailScreen(
                         shape = RoundedCornerShape(18.dp),
                         contentPadding = PaddingValues(horizontal = 20.dp),
                         colors = tint?.let { t ->
-                            val container = lighten(t.toArgb())
-                            ButtonDefaults.buttonColors(containerColor = Color(container), contentColor = Color(onColorFor(container)))
+                            ButtonDefaults.buttonColors(
+                                containerColor = t,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                            )
                         } ?: ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary,

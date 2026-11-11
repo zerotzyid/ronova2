@@ -62,10 +62,10 @@ android {
   // Split APKs per ABI: one APK for armv7a and one for arm64-v8a (no universal/fat APK).
   splits {
     abi {
-      enable = true
+      isEnable = true
       reset()
       include("armeabi-v7a", "arm64-v8a")
-      universalApk = false
+      isUniversalApk = false
     }
   }
   testOptions { unitTests { isIncludeAndroidResources = true } }

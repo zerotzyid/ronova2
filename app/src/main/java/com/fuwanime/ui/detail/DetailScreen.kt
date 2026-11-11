@@ -764,7 +764,7 @@ private fun EpisodeRow(
                 LinearProgressIndicator(
                     progress = { if (progress.isFinished) 1f else progress.progress },
                     modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(4.dp),
-                    trackColor = Color.White.copy(alpha = 0.2f),
+                    trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
                     drawStopIndicator = {},
                     gapSize = 0.dp,
                 )

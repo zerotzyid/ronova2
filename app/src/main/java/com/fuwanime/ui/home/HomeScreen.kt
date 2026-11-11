@@ -481,10 +481,11 @@ private fun HomeTopBar(solid: Boolean, syncing: Boolean, onSearch: () -> Unit, o
 
 @Composable
 fun Wordmark(onDark: Boolean = false) {
-    val style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, letterSpacing = (-0.04).em)
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text("fuwa", style = style, color = MaterialTheme.colorScheme.primary)
-        Text("stream", style = style, color = if (onDark) Color.White else MaterialTheme.colorScheme.onSurface)
+    val style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, letterSpacing = (-0.05).em)
+    val subStyle = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium, fontSize = 11.sp, letterSpacing = 0.1.em)
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("RINOVA", style = style, color = MaterialTheme.colorScheme.primary)
+        Text("ANIME · REMASTERED", style = subStyle, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

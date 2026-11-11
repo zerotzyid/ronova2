@@ -22,7 +22,7 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "FuwaStream"
+rootProject.name = "RINOVA - ANIME, REMASTERED"
 
 include(":app")
 include(":baselineprofile")

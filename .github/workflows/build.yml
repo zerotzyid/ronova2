@@ -41,18 +41,21 @@ jobs:
           BASE=$(git describe --tags --abbrev=0 --match 'v*.*.*' 2>/dev/null || echo v2.1.0)
           echo "VERSION_NAME=${BASE#v}-ci.${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
 
-      - name: Build Debug + Release APK and AAB
+      - name: Build Debug + Release APK (split per ABI)
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
-          ./gradlew assembleDebug assembleRelease bundleRelease --stacktrace
+          ./gradlew assembleDebug assembleRelease --stacktrace
 
       - name: Rename artifacts
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/debug/*.apk "dist/FuwaStream-debug.apk" 2>/dev/null || true
-          cp app/build/outputs/apk/release/*.apk "dist/FuwaStream-${{ env.VERSION_NAME }}.apk" 2>/dev/null || true
-          cp app/build/outputs/bundle/release/*.aab "dist/FuwaStream-${{ env.VERSION_NAME }}.aab" 2>/dev/null || true
+          # Debug APKs per ABI
+          cp app/build/outputs/apk/debug/app-debug-armeabi-v7a.apk "dist/FuwaStream-debug-armeabi-v7a.apk" 2>/dev/null || true
+          cp app/build/outputs/apk/debug/app-debug-arm64-v8a.apk "dist/FuwaStream-debug-arm64-v8a.apk" 2>/dev/null || true
+          # Release APKs per ABI
+          cp app/build/outputs/apk/release/app-release-armeabi-v7a.apk "dist/FuwaStream-${{ env.VERSION_NAME }}-armeabi-v7a.apk" 2>/dev/null || true
+          cp app/build/outputs/apk/release/app-release-arm64-v8a.apk "dist/FuwaStream-${{ env.VERSION_NAME }}-arm64-v8a.apk" 2>/dev/null || true
 
       - uses: actions/upload-artifact@v4
         with:

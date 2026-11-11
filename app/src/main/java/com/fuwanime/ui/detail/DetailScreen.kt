@@ -56,6 +56,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.border.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -339,7 +340,6 @@ private fun DetailScreen(
                             containerColor = MaterialTheme.colorScheme.surfaceContainer,
                             checkedContainerColor = MaterialTheme.colorScheme.primary,
                             checkedContentColor = MaterialTheme.colorScheme.onPrimary,
-                            uncheckedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         ),
                     ) {
                         FavoriteIcon(favorite, favoritePop, favoritePopShown) { favoritePopShown = it }

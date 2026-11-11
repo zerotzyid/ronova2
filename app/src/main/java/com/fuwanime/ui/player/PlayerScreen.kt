@@ -52,6 +52,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.border.BorderStroke
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.AspectRatio
@@ -1299,7 +1300,6 @@ private fun EpisodeInfo(
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = MaterialTheme.colorScheme.primary,
-                            borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                         ),
                     ) {
                         Icon(Icons.Rounded.SkipPrevious, null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)

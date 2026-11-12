@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.heightIn
 import com.fuwanime.ui.components.LocalNavBarPadding
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +30,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsTopHeight
@@ -104,6 +112,8 @@ import androidx.compose.animation.core.tween
 import com.fuwanime.ui.motion.Motion
 import com.fuwanime.ui.motion.sharedPosterKey
 import com.fuwanime.ui.motion.sharedKey
+import com.fuwanime.ui.motion.staggerIn
+import com.fuwanime.ui.motion.rememberStaggerState
 import com.fuwanime.ui.motion.pressScale
 import com.fuwanime.ui.motion.OpenAnime
 import com.fuwanime.data.Anime
@@ -170,6 +180,7 @@ fun HomeRoute(
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalFoundationApi::class)
 @Composable
 private fun HomeScreen(
     state: HomeUiState,
@@ -192,111 +203,241 @@ private fun HomeScreen(
     val listState = rememberLazyListState()
     val feed = state.feed
     var showUpdateSheet by remember { mutableStateOf(false) }
+    val density = LocalDensity.current
+    val screenWidth = with(density) { screenWidthDp.toInt() }
+    val isTablet = screenWidth >= 600
+    val gridColumns = when {
+        screenWidth >= 1200 -> 5
+        screenWidth >= 840 -> 4
+        screenWidth >= 600 -> 3
+        else -> 2
+    }
 
     PullToRefreshBox(isRefreshing = feed.refreshing, onRefresh = onRefresh, modifier = Modifier.fillMaxSize()) {
-        LazyColumn(state = listState, contentPadding = PaddingValues(bottom = 24.dp + LocalNavBarPadding.current), modifier = Modifier.fillMaxSize()) {
-            item(key = "hero") {
-                val heroLoading = feed.loading && state.hero.isEmpty()
-                Crossfade(heroLoading, animationSpec = tween(Motion.Medium), label = "hero") { loading ->
-                    if (loading) {
-                        SkeletonBox(Modifier.fillMaxWidth().height(heroHeightDp(LocalDensity.current.fontScale).dp), shape = MaterialTheme.shapes.extraSmall)
-                    } else if (state.hero.isNotEmpty()) {
-                        HeroPager(state.hero, favoriteIds, onToggleFavorite) { onAnimeClick(it, "home-hero") }
-                    } else {
-                        Spacer(Modifier.windowInsetsTopHeight(WindowInsets.statusBars).height(72.dp))
+        if (isTablet) {
+            LazyVerticalGrid(
+                state = listState,
+                columns = GridCells.Fixed(gridColumns),
+                contentPadding = PaddingValues(bottom = 24.dp + LocalNavBarPadding.current),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                item(key = "hero", span = { GridItemSpan(maxLineSpan) }) {
+                    val heroLoading = feed.loading && state.hero.isEmpty()
+                    Crossfade(heroLoading, animationSpec = tween(Motion.Medium), label = "hero") { loading ->
+                        if (loading) {
+                            SkeletonBox(Modifier.fillMaxWidth().height(heroHeightDp(LocalDensity.current.fontScale).dp), shape = MaterialTheme.shapes.extraSmall)
+                        } else if (state.hero.isNotEmpty()) {
+                            HeroPager(state.hero, favoriteIds, onToggleFavorite) { onAnimeClick(it, "home-hero") }
+                        } else {
+                            Spacer(Modifier.windowInsetsTopHeight(WindowInsets.statusBars).height(72.dp))
+                        }
                     }
                 }
-            }
 
-            if (update != null) {
-                item(key = "updateBanner") {
-                    UpdateBanner(update, onClick = { showUpdateSheet = true }, onDismiss = onDismissUpdate)
+                if (update != null) {
+                    item(key = "updateBanner", span = { GridItemSpan(maxLineSpan) }) {
+                        UpdateBanner(update, onClick = { showUpdateSheet = true }, onDismiss = onDismissUpdate)
+                    }
                 }
-            }
 
-            if (showRestore) {
-                item(key = "restoreBanner") { RestoreBanner(onRestore, onDismissRestore) }
-            }
+                if (showRestore) {
+                    item(key = "restoreBanner", span = { GridItemSpan(maxLineSpan) }) {
+                        RestoreBanner(onRestore, onDismissRestore)
+                    }
+                }
 
-            if (feed.error != null && feed.popular.isEmpty()) {
-                item { ErrorState(feed.error, onRefresh) }
-            }
+                if (feed.error != null && feed.popular.isEmpty()) {
+                    item(key = "error", span = { GridItemSpan(maxLineSpan) }) {
+                        ErrorState(feed.error, onRefresh)
+                    }
+                }
 
-            if (state.continueWatching.isNotEmpty()) {
-                item(key = "cw") {
-                    Section(stringResource(R.string.browse_home_continue)) {
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 20.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            items(state.continueWatching, key = { it.episodeId }) { entry ->
-                                ContinueWatchingCard(entry, onClick = { onContinue(entry) }, sharedOrigin = "home-cw")
+                if (state.continueWatching.isNotEmpty()) {
+                    item(key = "cw", span = { GridItemSpan(maxLineSpan) }) {
+                        Section(stringResource(R.string.browse_home_continue)) {
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 20.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                items(state.continueWatching, key = { it.episodeId }) { entry ->
+                                    ContinueWatchingCard(entry, onClick = { onContinue(entry) }, sharedOrigin = "home-cw")
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            if (feed.loading || feed.latest.isNotEmpty()) {
-                item(key = "latest") {
-                    Section(stringResource(R.string.browse_home_latest)) {
-                        val releases = remember(feed.latest) { feed.latest.associateBy { it.anime.id } }
-                        val res = LocalContext.current.resources
-                        PosterRow(feed.latest.map { it.anime }, feed.loading, { onAnimeClick(it, "home-latest") }, origin = "home-latest", isNew = { true }, caption = { a ->
-                            releases[a.id]?.let { r ->
-                                listOf(r.episodeLabel.trim(), relativeTime(res, r.updatedAt))
-                                    .filter { it.isNotBlank() }
-                                    .joinToString(" · ")
-                                    .ifBlank { null }
+                if (feed.loading || feed.latest.isNotEmpty()) {
+                    item(key = "latest", span = { GridItemSpan(maxLineSpan) }) {
+                        Section(stringResource(R.string.browse_home_latest)) {
+                            val releases = remember(feed.latest) { feed.latest.associateBy { it.anime.id } }
+                            val res = LocalContext.current.resources
+                            PosterGrid(feed.latest.map { it.anime }, feed.loading, { onAnimeClick(it, "home-latest") }, origin = "home-latest", isNew = { true }, caption = { a ->
+                                releases[a.id]?.let { r ->
+                                    listOf(r.episodeLabel.trim(), relativeTime(res, r.updatedAt))
+                                        .filter { it.isNotBlank() }
+                                        .joinToString(" · ")
+                                        .ifBlank { null }
+                                }
+                            })
+                        }
+                    }
+                }
+
+                if (feed.loading || feed.today.isNotEmpty()) {
+                    item(key = "today", span = { GridItemSpan(maxLineSpan) }) {
+                        Section(stringResource(R.string.browse_home_today), subtitle = todayLabel, onSeeAll = onSchedule) {
+                            val releaseFmt = stringResource(R.string.browse_release_at, "%1\$s")
+                            PosterGrid(feed.today, feed.loading, { onAnimeClick(it, "home-today") }, origin = "home-today", caption = { a ->
+                                a.nextAirTime.takeIf { it.isNotBlank() }?.let { releaseFmt.format(airTime(it)) }
+                            })
+                        }
+                    }
+                }
+
+                if (feed.loading || feed.thisSeason.isNotEmpty()) {
+                    item(key = "season", span = { GridItemSpan(maxLineSpan) }) {
+                        Section(stringResource(R.string.browse_home_airing), subtitle = stringResource(R.string.browse_home_airing_subtitle)) {
+                            val seasonRes = LocalContext.current.resources
+                            val viewsFmt = stringResource(R.string.browse_views, "%1\$s")
+                            PosterGrid(
+                                feed.thisSeason, feed.loading, { onAnimeClick(it, "home-season") },
+                                origin = "home-season", caption = { viewsFmt.format(compactNumber(seasonRes, it.views)) },
+                            )
+                        }
+                    }
+                }
+
+                item(key = "popular", span = { GridItemSpan(maxLineSpan) }) {
+                    Section(stringResource(R.string.common_sort_popular), subtitle = stringResource(R.string.browse_home_popular_subtitle), onSeeAll = { onExplore(null) }) {
+                        val top = feed.popular.take(10)
+                        if (top.isEmpty()) {
+                            PosterGrid(top, feed.loading, { onAnimeClick(it, "home-popular") })
+                        } else {
+                            RankedRow(top, { onAnimeClick(it, "home-popular") }, origin = "home-popular")
+                        }
+                    }
+                }
+
+                item(key = "genres", span = { GridItemSpan(maxLineSpan) }) {
+                    Section(stringResource(R.string.browse_home_genres)) {
+                        FlowRow(
+                            Modifier.padding(horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            QuickGenres.forEach { g -> TagChip(g, onClick = { onExplore(g) }) }
+                        }
+                    }
+                }
+            }
+        } else {
+            LazyColumn(state = listState, contentPadding = PaddingValues(bottom = 24.dp + LocalNavBarPadding.current), modifier = Modifier.fillMaxSize()) {
+                item(key = "hero") {
+                    val heroLoading = feed.loading && state.hero.isEmpty()
+                    Crossfade(heroLoading, animationSpec = tween(Motion.Medium), label = "hero") { loading ->
+                        if (loading) {
+                            SkeletonBox(Modifier.fillMaxWidth().height(heroHeightDp(LocalDensity.current.fontScale).dp), shape = MaterialTheme.shapes.extraSmall)
+                        } else if (state.hero.isNotEmpty()) {
+                            HeroPager(state.hero, favoriteIds, onToggleFavorite) { onAnimeClick(it, "home-hero") }
+                        } else {
+                            Spacer(Modifier.windowInsetsTopHeight(WindowInsets.statusBars).height(72.dp))
+                        }
+                    }
+                }
+
+                if (update != null) {
+                    item(key = "updateBanner") {
+                        UpdateBanner(update, onClick = { showUpdateSheet = true }, onDismiss = onDismissUpdate)
+                    }
+                }
+
+                if (showRestore) {
+                    item(key = "restoreBanner") { RestoreBanner(onRestore, onDismissRestore) }
+                }
+
+                if (feed.error != null && feed.popular.isEmpty()) {
+                    item { ErrorState(feed.error, onRefresh) }
+                }
+
+                if (state.continueWatching.isNotEmpty()) {
+                    item(key = "cw") {
+                        Section(stringResource(R.string.browse_home_continue)) {
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 20.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                items(state.continueWatching, key = { it.episodeId }) { entry ->
+                                    ContinueWatchingCard(entry, onClick = { onContinue(entry) }, sharedOrigin = "home-cw")
+                                }
                             }
-                        })
+                        }
                     }
                 }
-            }
 
-            if (feed.loading || feed.today.isNotEmpty()) {
-                item(key = "today") {
-                    Section(stringResource(R.string.browse_home_today), subtitle = todayLabel, onSeeAll = onSchedule) {
-                        val releaseFmt = stringResource(R.string.browse_release_at, "%1\$s")
-                        PosterRow(feed.today, feed.loading, { onAnimeClick(it, "home-today") }, origin = "home-today", caption = { a ->
-                            a.nextAirTime.takeIf { it.isNotBlank() }?.let { releaseFmt.format(airTime(it)) }
-                        })
+                if (feed.loading || feed.latest.isNotEmpty()) {
+                    item(key = "latest") {
+                        Section(stringResource(R.string.browse_home_latest)) {
+                            val releases = remember(feed.latest) { feed.latest.associateBy { it.anime.id } }
+                            val res = LocalContext.current.resources
+                            PosterRow(feed.latest.map { it.anime }, feed.loading, { onAnimeClick(it, "home-latest") }, origin = "home-latest", isNew = { true }, caption = { a ->
+                                releases[a.id]?.let { r ->
+                                    listOf(r.episodeLabel.trim(), relativeTime(res, r.updatedAt))
+                                        .filter { it.isNotBlank() }
+                                        .joinToString(" · ")
+                                        .ifBlank { null }
+                                }
+                            })
+                        }
                     }
                 }
-            }
 
-            if (feed.loading || feed.thisSeason.isNotEmpty()) {
-                item(key = "season") {
-                    Section(stringResource(R.string.browse_home_airing), subtitle = stringResource(R.string.browse_home_airing_subtitle)) {
-                        val seasonRes = LocalContext.current.resources
-                        val viewsFmt = stringResource(R.string.browse_views, "%1\$s")
-                        PosterRow(
-                            feed.thisSeason, feed.loading, { onAnimeClick(it, "home-season") },
-                            origin = "home-season", caption = { viewsFmt.format(compactNumber(seasonRes, it.views)) },
-                        )
+                if (feed.loading || feed.today.isNotEmpty()) {
+                    item(key = "today") {
+                        Section(stringResource(R.string.browse_home_today), subtitle = todayLabel, onSeeAll = onSchedule) {
+                            val releaseFmt = stringResource(R.string.browse_release_at, "%1\$s")
+                            PosterRow(feed.today, feed.loading, { onAnimeClick(it, "home-today") }, origin = "home-today", caption = { a ->
+                                a.nextAirTime.takeIf { it.isNotBlank() }?.let { releaseFmt.format(airTime(it)) }
+                            })
+                        }
                     }
                 }
-            }
 
-            item(key = "popular") {
-                Section(stringResource(R.string.common_sort_popular), subtitle = stringResource(R.string.browse_home_popular_subtitle), onSeeAll = { onExplore(null) }) {
-                    val top = feed.popular.take(10)
-                    if (top.isEmpty()) {
-                        PosterRow(top, feed.loading, { onAnimeClick(it, "home-popular") })
-                    } else {
-                        RankedRow(top, { onAnimeClick(it, "home-popular") }, origin = "home-popular")
+                if (feed.loading || feed.thisSeason.isNotEmpty()) {
+                    item(key = "season") {
+                        Section(stringResource(R.string.browse_home_airing), subtitle = stringResource(R.string.browse_home_airing_subtitle)) {
+                            val seasonRes = LocalContext.current.resources
+                            val viewsFmt = stringResource(R.string.browse_views, "%1\$s")
+                            PosterRow(
+                                feed.thisSeason, feed.loading, { onAnimeClick(it, "home-season") },
+                                origin = "home-season", caption = { viewsFmt.format(compactNumber(seasonRes, it.views)) },
+                            )
+                        }
                     }
                 }
-            }
 
-            item(key = "genres") {
-                Section(stringResource(R.string.browse_home_genres)) {
-                    FlowRow(
-                        Modifier.padding(horizontal = 20.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        QuickGenres.forEach { g -> TagChip(g, onClick = { onExplore(g) }) }
+                item(key = "popular") {
+                    Section(stringResource(R.string.common_sort_popular), subtitle = stringResource(R.string.browse_home_popular_subtitle), onSeeAll = { onExplore(null) }) {
+                        val top = feed.popular.take(10)
+                        if (top.isEmpty()) {
+                            PosterRow(top, feed.loading, { onAnimeClick(it, "home-popular") })
+                        } else {
+                            RankedRow(top, { onAnimeClick(it, "home-popular") }, origin = "home-popular")
+                        }
+                    }
+                }
+
+                item(key = "genres") {
+                    Section(stringResource(R.string.browse_home_genres)) {
+                        FlowRow(
+                            Modifier.padding(horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            QuickGenres.forEach { g -> TagChip(g, onClick = { onExplore(g) }) }
+                        }
                     }
                 }
             }
@@ -674,6 +815,48 @@ private fun RankedRow(items: List<Anime>, onClick: (Anime) -> Unit, origin: Stri
                         .clickable(interactionSource = press, indication = LocalIndication.current) { onClick(anime) },
                     anime.title,
                 )
+            }
+        }
+    }
+}
+
+/** Poster grid for tablet/large screens: 2D grid instead of horizontal row. */
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalFoundationApi::class)
+@Composable
+private fun PosterGrid(
+    items: List<Anime>,
+    loading: Boolean,
+    onClick: (Anime) -> Unit,
+    caption: (Anime) -> String? = { null },
+    origin: String? = null,
+    isNew: (Anime) -> Boolean = { false },
+    highlightId: String? = null,
+) {
+    val stagger = rememberStaggerState()
+    Crossfade(loading && items.isEmpty(), animationSpec = tween(Motion.Medium), label = "posterGrid") { skeleton ->
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(4),
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            if (skeleton) {
+                itemsIndexed(12) { index ->
+                    PosterSkeleton(width = 150.dp)
+                }
+            } else {
+                itemsIndexed(items, key = { _, a -> a.id }) { index, anime ->
+                    PosterCard(
+                        anime,
+                        onClick = { onClick(anime) },
+                        modifier = Modifier.staggerIn(stagger, anime.id, index),
+                        width = 150.dp,
+                        caption = caption(anime),
+                        sharedOrigin = origin,
+                        isNew = isNew(anime),
+                        highlighted = anime.id == highlightId,
+                    )
+                }
             }
         }
     }

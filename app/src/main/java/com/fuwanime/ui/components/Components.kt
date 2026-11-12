@@ -20,7 +20,6 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -531,34 +530,6 @@ fun StatusPill(status: String, modifier: Modifier = Modifier) {
     )
 }
 
-/** Press-scale card wrapper with enhanced micro-interaction feedback. */
-@Composable
-fun PressScaleCard(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    interactionSource: MutableInteractionSource = remember(),
-    content: @Composable () -> Unit,
-    enabled: Boolean = true,
-) {
-    val isPressed by interactionSource.collectIsPressedAsState()
-    Column(
-        modifier
-            .clickable(
-                interactionSource = interactionSource,
-                indication = if (enabled) LocalIndication.current else null,
-                onClick = onClick,
-                enabled = enabled,
-            )
-            .graphicsLayer {
-                scaleX = if (isPressed) 0.96f else 1f
-                scaleY = if (isPressed) 0.96f else 1f
-            }
-            .animateContentSize(),
-    ) {
-        content()
-    }
-}
-
 /** Enhanced ripple button with neon accent on press. */
 @Composable
 fun NeonRippleButton(
@@ -571,17 +542,14 @@ fun NeonRippleButton(
     backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
     shape: androidx.compose.ui.graphics.Shape = MaterialTheme.shapes.small,
 ) {
-    val interaction = remember { MutableInteractionSource() }
-    val isPressed by interaction.collectIsPressedAsState()
     Box(
         modifier
             .clickable(
-                interactionSource = interaction,
                 indication = LocalIndication.current,
                 onClick = onClick,
             )
             .background(
-                if (isPressed) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else backgroundColor,
+                backgroundColor,
                 shape = shape,
             )
             .clip(shape),
@@ -596,14 +564,14 @@ fun NeonRippleButton(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = if (isPressed) MaterialTheme.colorScheme.onPrimary else iconTint,
+                    tint = iconTint,
                 )
             }
             if (label != null) {
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (isPressed) MaterialTheme.colorScheme.onPrimary else textColor,
+                    color = textColor,
                 )
             }
         }

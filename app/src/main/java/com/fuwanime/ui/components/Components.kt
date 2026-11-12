@@ -88,7 +88,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.fuwanime.data.Anime
 import com.fuwanime.data.local.ThemeMode
-import com.fuwanime.ui.components.HapticFeedback.rememberHapticFeedback
+import com.fuwanime.ui.components.HapticFeedback.rememberFuwaHapticFeedback
 import com.fuwanime.ui.motion.LocalReduceMotion
 import com.fuwanime.ui.motion.Motion
 import com.fuwanime.ui.motion.aboveSharedElements
@@ -195,7 +195,7 @@ fun PosterCard(
 ) {
     val interaction = remember { MutableInteractionSource() }
     val res = LocalContext.current.resources
-    val haptic = rememberHapticFeedback()
+    val haptic = rememberFuwaHapticFeedback()
     val marked = highlighted || selected
     Column(
         (if (width != null) modifier.width(width) else modifier)
@@ -313,7 +313,7 @@ fun NewBadge(modifier: Modifier = Modifier) {
 @Composable
 fun TagChip(label: String, onClick: () -> Unit, modifier: Modifier = Modifier, selected: Boolean = false) {
     val colors = MaterialTheme.colorScheme
-    val haptic = rememberHapticFeedback()
+    val haptic = rememberFuwaHapticFeedback()
     Surface(
         selected = selected,
         onClick = {

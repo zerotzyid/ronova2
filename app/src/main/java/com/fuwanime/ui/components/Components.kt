@@ -80,7 +80,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -541,18 +541,15 @@ fun PressScaleCard(
     content: @Composable () -> Unit,
     enabled: Boolean = true,
 ) {
-    val isPressed by collectIsPressedAsState(
-        interactionSource = interactionSource,
-        modifier = modifier
+    val isPressed by interactionSource.collectIsPressedAsState()
+    Column(
+        modifier
             .clickable(
                 interactionSource = interactionSource,
                 indication = if (enabled) LocalIndication.current else null,
                 onClick = onClick,
                 enabled = enabled,
-            ),
-    )
-    Column(
-        modifier
+            )
             .graphicsLayer(scale = if (isPressed) 0.96f else 1f)
             .animateContentSize(),
     ) {
@@ -573,7 +570,7 @@ fun NeonRippleButton(
     shape: androidx.compose.ui.graphics.Shape = MaterialTheme.shapes.small,
 ) {
     val interaction = remember { MutableInteractionSource() }
-    val isPressed by collectIsPressedAsState(interactionSource = interaction)
+    val isPressed by interaction.collectIsPressedAsState()
     Box(
         modifier
             .clickable(

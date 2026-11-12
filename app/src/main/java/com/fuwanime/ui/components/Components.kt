@@ -88,9 +88,8 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.fuwanime.data.Anime
 import com.fuwanime.data.local.ThemeMode
-import com.fuwanime.ui.components.HapticFeedback as hapticPkg
-import com.fuwanime.ui.components.HapticFeedback.FuwaHapticFeedback
-import com.fuwanime.ui.components.HapticFeedback.rememberFuwaHapticFeedback as rememberFuwaHapticFeedback
+import com.fuwanime.ui.components.haptic.FuwaHapticFeedback
+import com.fuwanime.ui.components.haptic.rememberFuwaHapticFeedback
 import com.fuwanime.ui.motion.LocalReduceMotion
 import com.fuwanime.ui.motion.Motion
 import com.fuwanime.ui.motion.aboveSharedElements

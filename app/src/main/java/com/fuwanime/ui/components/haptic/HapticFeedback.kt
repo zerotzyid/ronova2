@@ -1,4 +1,4 @@
-package com.fuwanime.ui.components
+package com.fuwanime.ui.components.haptic
 
 import android.content.Context
 import android.os.VibrationEffect

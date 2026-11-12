@@ -126,7 +126,7 @@ private fun GenreTiles(tags: List<MangaTag>, onPick: (String) -> Unit, onType: (
                 Box(
                     Modifier.size(width = 132.dp, height = 72.dp).clip(RoundedCornerShape(16.dp)).background(colors[i % colors.size]).clickable(onClick = onClick).padding(12.dp),
                     contentAlignment = Alignment.BottomStart,
-                ) { Text(label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.White) }
+                ) { Text(label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface) }
             }
         }
     }

@@ -545,7 +545,6 @@ fun NeonRippleButton(
     Box(
         modifier
             .clickable(
-                indication = LocalIndication.current,
                 onClick = onClick,
             )
             .background(

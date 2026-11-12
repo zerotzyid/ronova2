@@ -96,6 +96,7 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.ExperimentalAnimationApi
 import com.fuwanime.ui.motion.passTouchesThrough
@@ -279,13 +280,24 @@ fun FuwaNavHost(initialTarget: LaunchTarget? = null, onInitialTargetConsumed: ()
                 enter = expandHorizontally(expandFrom = Alignment.Start) + slideInHorizontally { -it },
                 exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + slideOutHorizontally { -it },
             ) {
-                NavigationRail(containerColor = colors.surfaceContainerLow) {
+                NavigationRail(
+                    containerColor = colors.surfaceContainerLow,
+                    modifier = Modifier
+                        .background(colors.surfaceContainerLow)
+                        .border(1.dp, colors.outlineVariant, RoundedCornerShape(0.dp)),
+                ) {
                     Tab.entries.forEach { tab ->
                         val selected = tab == currentTab
                         NavigationRailItem(
                             selected = selected,
                             onClick = { onTab(tab) },
-                            icon = { Icon(if (selected) tab.selectedIcon else tab.icon, null) },
+                            icon = {
+                                Icon(
+                                    if (selected) tab.selectedIcon else tab.icon,
+                                    null,
+                                    tint = if (selected) colors.primary else colors.onSurfaceVariant,
+                                )
+                            },
                             label = { NavLabel(stringResource(tab.label), selected) },
                             colors = railColors,
                         )

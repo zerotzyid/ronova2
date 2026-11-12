@@ -16,7 +16,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.animateFloatAsState
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.clickable
@@ -690,12 +689,14 @@ fun PulseIndicator(
     color: Color = MaterialTheme.colorScheme.primary,
     size: Dp = 8.dp,
 ) {
-    val alpha by animateFloatAsState(
-        targetValue = if (LocalReduceMotion.current) 1f else 0.4f,
+    val transition = rememberInfiniteTransition(label = "pulse")
+    val alpha by transition.animateFloat(
+        initialValue = if (LocalReduceMotion.current) 1f else 0.4f,
+        targetValue = if (LocalReduceMotion.current) 1f else 1f,
         animationSpec = infiniteRepeatable(
             animationSpec = tween(1000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse,
-            startDelay = 0,
+            label = "pulseAlpha",
         ),
     )
     Box(

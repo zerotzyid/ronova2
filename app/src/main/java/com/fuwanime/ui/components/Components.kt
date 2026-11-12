@@ -698,7 +698,7 @@ fun PulseIndicator(
         )
     } else {
         val transition = rememberInfiniteTransition(label = "pulse")
-        val alpha by transition.animateFloat<Float>(
+        val alpha by transition.animateFloat(
             initialValue = 0.4f,
             targetValue = 1f,
             animationSpec = infiniteRepeatable(

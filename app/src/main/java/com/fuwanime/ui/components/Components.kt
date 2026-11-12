@@ -540,9 +540,7 @@ fun PressScaleCard(
     content: @Composable () -> Unit,
     enabled: Boolean = true,
 ) {
-    val isPressed by collectIsPressedAsState(
-        interactionSource = interactionSource,
-    )
+    val isPressed by interactionSource.collectIsPressedAsState()
     Column(
         modifier
             .clickable(
@@ -682,8 +680,8 @@ fun EnhancedSkeletonBox(
     Box(
         modifier
             .clip(shape)
-            .then(if (width != null) Modifier.requiredWidth(width) else Modifier)
-            .then(if (height != null) Modifier.requiredHeight(height) else Modifier)
+            .then(if (width != null) Modifier.width(width) else Modifier)
+            .then(if (height != null) Modifier.height(height) else Modifier)
             .shimmer(),
     )
 }

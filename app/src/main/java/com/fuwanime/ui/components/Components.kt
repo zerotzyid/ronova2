@@ -540,7 +540,9 @@ fun PressScaleCard(
     content: @Composable () -> Unit,
     enabled: Boolean = true,
 ) {
-    val isPressed by interactionSource.collectIsPressedAsState()
+    val isPressed by collectIsPressedAsState(
+        interactionSource = interactionSource,
+    )
     Column(
         modifier
             .clickable(
@@ -549,7 +551,10 @@ fun PressScaleCard(
                 onClick = onClick,
                 enabled = enabled,
             )
-            .graphicsLayer(scale = if (isPressed) 0.96f else 1f)
+            .graphicsLayer {
+                scaleX = if (isPressed) 0.96f else 1f
+                scaleY = if (isPressed) 0.96f else 1f
+            }
             .animateContentSize(),
     ) {
         content()
@@ -677,7 +682,8 @@ fun EnhancedSkeletonBox(
     Box(
         modifier
             .clip(shape)
-            .size(if (width != null) width else Modifier.fillMaxWidth(), if (height != null) height else Modifier.fillMaxHeight())
+            .then(if (width != null) Modifier.requiredWidth(width) else Modifier)
+            .then(if (height != null) Modifier.requiredHeight(height) else Modifier)
             .shimmer(),
     )
 }

@@ -22,6 +22,8 @@ fun rememberFuwaHapticFeedback(): FuwaHapticFeedback {
 }
 
 /** Haptic feedback implementation using Android Vibrator API. */
+typealias FuwaHapticFeedback = FuwaHapticFeedbackImpl
+
 class FuwaHapticFeedbackImpl(private val context: Context) {
     private val vibrator: Vibrator? = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
 

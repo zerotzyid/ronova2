@@ -624,6 +624,14 @@ fun ThemeModeToggle(
                         tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp),
                     )
+                    // Color preview chip showing the accent color for this theme mode
+                    Box(
+                        Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .background(themePreviewColor(mode))
+                            .border(1.dp, if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.outlineVariant, CircleShape),
+                    )
                     Text(
                         text = label,
                         style = MaterialTheme.typography.labelSmall,
@@ -666,4 +674,12 @@ fun PulseIndicator(
             .clip(CircleShape)
             .background(color),
     )
+}
+
+/** Preview color chip for theme mode toggle - shows the accent color each mode would use. */
+@Composable
+private fun themePreviewColor(mode: ThemeMode): Color = when (mode) {
+    ThemeMode.LIGHT -> MaterialTheme.colorScheme.primary
+    ThemeMode.DARK -> MaterialTheme.colorScheme.secondary
+    ThemeMode.SYSTEM -> MaterialTheme.colorScheme.tertiary
 }

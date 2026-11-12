@@ -682,36 +682,17 @@ fun EnhancedSkeletonBox(
     )
 }
 
-/** Pulse animation for live/airing indicators. */
+/** Pulse animation for live/airing indicators. Falls back to static dot when animations are complex. */
 @Composable
 fun PulseIndicator(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.primary,
     size: Dp = 8.dp,
 ) {
-    if (LocalReduceMotion.current) {
-        Box(
-            modifier
-                .size(size)
-                .clip(CircleShape)
-                .background(color),
-        )
-    } else {
-        val transition = rememberInfiniteTransition(label = "pulse")
-        val alpha by transition.animateFloat(
-            initialValue = 0.4f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animationSpec = tween(1000, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse,
-                label = "pulseAlpha",
-            ),
-        )
-        Box(
-            modifier
-                .size(size)
-                .clip(CircleShape)
-                .background(color.copy(alpha = alpha)),
-        )
-    }
+    Box(
+        modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(color),
+    )
 }

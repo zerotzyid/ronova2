@@ -979,10 +979,10 @@ private fun Controls(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    0f to Color.Black.copy(alpha = 0.7f),
-                    0.3f to Color.Black.copy(alpha = 0.25f),
-                    0.7f to Color.Black.copy(alpha = 0.25f),
-                    1f to Color.Black.copy(alpha = 0.75f),
+                    0f to MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
+                    0.3f to MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                    0.7f to MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                    1f to MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
                 ),
             ),
     ) {
@@ -992,28 +992,28 @@ private fun Controls(
                 .then(if (fullscreen) Modifier.padding(horizontal = 24.dp, vertical = 8.dp) else Modifier),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.watch_back), tint = Color.White) }
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.watch_back), tint = MaterialTheme.colorScheme.onSurface) }
             Column(Modifier.weight(1f)) {
                 Text(
                     state.anime?.title.orEmpty(),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.titleSmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     stringResource(R.string.watch_episode_label, state.episode.number) + (state.source?.let { " • " + it.label() } ?: ""),
-                    color = Color.White.copy(alpha = 0.75f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.labelSmall,
                 )
             }
             if (fullscreen) {
-                IconWithTooltip(stringResource(R.string.watch_lock_screen), Icons.Rounded.Lock, onLock, tint = Color.White)
+                IconWithTooltip(stringResource(R.string.watch_lock_screen), Icons.Rounded.Lock, onLock, tint = MaterialTheme.colorScheme.onSurface)
             }
             if (pipSupported) {
-                IconWithTooltip("Picture-in-Picture", Icons.Rounded.PictureInPictureAlt, onEnterPip, tint = Color.White)
+                IconWithTooltip("Picture-in-Picture", Icons.Rounded.PictureInPictureAlt, onEnterPip, tint = MaterialTheme.colorScheme.onSurface)
             }
-            IconWithTooltip(stringResource(R.string.watch_video_settings), Icons.Rounded.Settings, { onOpenSettings(); onInteract() }, tint = Color.White)
+            IconWithTooltip(stringResource(R.string.watch_video_settings), Icons.Rounded.Settings, { onOpenSettings(); onInteract() }, tint = MaterialTheme.colorScheme.onSurface)
         }
 
         // Center transport
@@ -1026,7 +1026,7 @@ private fun Controls(
             TransportButton(Icons.Rounded.FastRewind, stringResource(R.string.watch_rewind_10), onClick = { player.seekSafely(player.effectivePosition(playback) - 10_000, playback); onInteract() })
             Surface(
                 shape = CircleShape,
-                color = Color.White.copy(alpha = 0.18f),
+                color = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.8f),
                 modifier = Modifier.size(64.dp).clip(CircleShape).clickable {
                     if (player.isPlaying) player.pause() else {
                         if (player.playbackState == Player.STATE_ENDED) player.seekTo(0)
@@ -1039,7 +1039,7 @@ private fun Controls(
                     Icon(
                         if (playback.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                         stringResource(if (playback.isPlaying) R.string.watch_pause else R.string.watch_play),
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(38.dp),
                     )
                 }
@@ -1058,7 +1058,7 @@ private fun Controls(
                 val shown = scrubbing?.let { (it * duration).toLong() } ?: playback.position
                 Text(
                     "${formatDuration(shown)} / ${formatDuration(playback.duration)}",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.weight(1f).padding(start = 4.dp),
                 )
@@ -1066,15 +1066,15 @@ private fun Controls(
                     stringResource(if (fullscreen) R.string.watch_exit_fullscreen else R.string.watch_fullscreen),
                     if (fullscreen) Icons.Rounded.FullscreenExit else Icons.Rounded.Fullscreen,
                     onToggleFullscreen,
-                    tint = Color.White,
+                    tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
             Box(Modifier.fillMaxWidth().height(24.dp), contentAlignment = Alignment.Center) {
                 LinearProgressIndicator(
                     progress = { playback.buffered.toFloat() / duration },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp).height(3.dp).clip(CircleShape),
-                    color = Color.White.copy(alpha = 0.35f),
-                    trackColor = Color.White.copy(alpha = 0.15f),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
                     drawStopIndicator = {},
                     gapSize = 0.dp,
                 )
@@ -1101,7 +1101,7 @@ private fun Controls(
                     colors = SliderDefaults.colors(
                         thumbColor = MaterialTheme.colorScheme.primary,
                         activeTrackColor = MaterialTheme.colorScheme.primary,
-                        inactiveTrackColor = Color.Transparent,
+                        inactiveTrackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
                     ),
                     modifier = Modifier.fillMaxWidth().height(24.dp),
                 )

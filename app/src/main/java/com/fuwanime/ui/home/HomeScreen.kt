@@ -123,7 +123,9 @@ import com.fuwanime.ui.components.ContinueWatchingCard
 import com.fuwanime.ui.components.ErrorState
 import com.fuwanime.ui.components.NetImage
 import com.fuwanime.ui.components.RefreshHairline
+import com.fuwanime.ui.components.PosterCard
 import com.fuwanime.ui.components.PosterRow
+import com.fuwanime.ui.components.PosterSkeleton
 import com.fuwanime.ui.components.SectionHeader
 import com.fuwanime.ui.components.SkeletonBox
 import com.fuwanime.util.airTime
@@ -179,8 +181,7 @@ fun HomeRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
-@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class, ExperimentalSharedTransitionApi::class, ExperimentalFoundationApi::class)
 @Composable
 private fun HomeScreen(
     state: HomeUiState,
@@ -201,10 +202,11 @@ private fun HomeScreen(
     onExplore: (String?) -> Unit,
 ) {
     val listState = rememberLazyListState()
+    val gridState = rememberLazyGridState()
     val feed = state.feed
     var showUpdateSheet by remember { mutableStateOf(false) }
     val density = LocalDensity.current
-    val screenWidth = with(density) { screenWidthDp.toInt() }
+    val screenWidth = with(density) { LocalConfiguration.current.screenWidthDp.toInt() }
     val isTablet = screenWidth >= 600
     val gridColumns = when {
         screenWidth >= 1200 -> 5
@@ -216,7 +218,7 @@ private fun HomeScreen(
     PullToRefreshBox(isRefreshing = feed.refreshing, onRefresh = onRefresh, modifier = Modifier.fillMaxSize()) {
         if (isTablet) {
             LazyVerticalGrid(
-                state = listState,
+                state = gridState,
                 columns = GridCells.Fixed(gridColumns),
                 contentPadding = PaddingValues(bottom = 24.dp + LocalNavBarPadding.current),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),

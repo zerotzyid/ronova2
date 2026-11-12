@@ -15,10 +15,12 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -80,6 +82,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.fuwanime.data.Anime
+import com.fuwanime.data.local.ThemeMode
 import com.fuwanime.ui.motion.LocalReduceMotion
 import com.fuwanime.ui.motion.Motion
 import com.fuwanime.ui.motion.aboveSharedElements
@@ -519,5 +522,182 @@ fun StatusPill(status: String, modifier: Modifier = Modifier) {
         modifier,
         container = if (ongoing) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.surfaceContainerHighest,
         content = if (ongoing) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+/** Press-scale card wrapper with enhanced micro-interaction feedback. */
+@Composable
+fun PressScaleCard(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    interactionSource: MutableInteractionSource = remember(),
+    content: @Composable () -> Unit,
+    enabled: Boolean = true,
+) {
+    val isPressed by collectIsPressedAsState(
+        interactionSource = interactionSource,
+        modifier = modifier
+            .clickable(
+                interactionSource = interactionSource,
+                indication = if (enabled) LocalIndication.current else null,
+                onClick = onClick,
+                enabled = enabled,
+            ),
+    )
+    Column(
+        modifier
+            .graphicsLayer(scale = if (isPressed) 0.96f else 1f)
+            .animateContentSize(),
+    ) {
+        content()
+    }
+}
+
+/** Enhanced ripple button with neon accent on press. */
+@Composable
+fun NeonRippleButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    label: String? = null,
+    iconTint: Color = MaterialTheme.colorScheme.primary,
+    textColor: Color = MaterialTheme.colorScheme.onSurface,
+    backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
+    shape: androidx.compose.ui.graphics.Shape = MaterialTheme.shapes.small,
+) {
+    val interaction = remember { MutableInteractionSource() }
+    val isPressed by collectIsPressedAsState(interactionSource = interaction)
+    Box(
+        modifier
+            .clickable(
+                interactionSource = interaction,
+                indication = LocalIndication.current,
+                onClick = onClick,
+            )
+            .background(
+                if (isPressed) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else backgroundColor,
+                shape = shape,
+            )
+            .clip(shape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (isPressed) MaterialTheme.colorScheme.onPrimary else iconTint,
+                )
+            }
+            if (label != null) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (isPressed) MaterialTheme.colorScheme.onPrimary else textColor,
+                )
+            }
+        }
+    }
+}
+
+/** Visual theme mode toggle with live color preview. */
+@Composable
+fun ThemeModeToggle(
+    currentMode: ThemeMode,
+    onModeChange: (ThemeMode) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val modes = listOf(
+        ThemeMode.LIGHT to stringResource(R.string.mine_theme_light),
+        ThemeMode.DARK to stringResource(R.string.mine_theme_dark),
+        ThemeMode.SYSTEM to stringResource(R.string.mine_theme_system),
+    )
+    val icons = mapOf(
+        ThemeMode.LIGHT to Icons.Rounded.LightMode,
+        ThemeMode.DARK to Icons.Rounded.DarkMode,
+        ThemeMode.SYSTEM to Icons.Rounded.AutoAwesome,
+    )
+    Row(
+        modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .clip(RoundedCornerShape(16.dp))
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        modes.forEachIndexed { index, (mode, label) ->
+            val isSelected = currentMode == mode
+            Box(
+                Modifier
+                    .weight(1f)
+                    .heightIn(min = 44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
+                    .clickable(onClick = { onModeChange(mode) })
+                    .animateContentSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(
+                        imageVector = icons[mode] ?: Icons.Rounded.AutoAwesome,
+                        contentDescription = null,
+                        tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Enhanced shimmer loading with faster, smoother animation. */
+@Composable
+fun EnhancedSkeletonBox(
+    modifier: Modifier,
+    shape: androidx.compose.ui.graphics.Shape = MaterialTheme.shapes.small,
+    height: Dp? = null,
+    width: Dp? = null,
+) {
+    Box(
+        modifier
+            .clip(shape)
+            .size(if (width != null) width else Modifier.fillMaxWidth(), if (height != null) height else Modifier.fillMaxHeight())
+            .shimmer(),
+    )
+}
+
+/** Pulse animation for live/airing indicators. */
+@Composable
+fun PulseIndicator(
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.primary,
+    size: Dp = 8.dp,
+) {
+    val alpha by animateFloatAsState(
+        targetValue = if (LocalReduceMotion.current) 1f else 0.4f,
+        animationSpec = infiniteRepeatable(
+            animationSpec = tween(1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+            startDelay = 0,
+        ),
+    )
+    Box(
+        modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(color.copy(alpha = alpha)),
     )
 }

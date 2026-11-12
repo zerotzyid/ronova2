@@ -161,18 +161,18 @@ private enum class Tab(val route: String, @StringRes val label: Int, val icon: I
 /** Detail and player sit on top of the tabs; moving to or from them is a fade under a shared element. */
 private fun NavBackStackEntry.isOverlay() = destination.route == Routes.DETAIL || destination.route == Routes.PLAYER
 
-private val FadeThroughIn = fadeIn(tween(Motion.Medium, 90, Motion.EmphasizedDecelerate)) +
-    scaleIn(tween(Motion.Medium, 90, Motion.EmphasizedDecelerate), initialScale = 0.94f)
-private val FadeThroughOut = fadeOut(tween(90, easing = Motion.EmphasizedAccelerate))
-// The page underneath is always fully visible, so the flying poster never floats over an empty screen (the old
-// fade-through left ~100 ms of blank). Opening: the new page slides in ~10% and covers it in 150 ms. Closing: the
-// page beneath is there at once (slides back, no fade) while the top page slides off and fades in 150 ms.
-private val PageIn = slideInHorizontally(tween(Motion.Page, easing = Motion.EmphasizedDecelerate)) { it / 10 } +
-    fadeIn(tween(Motion.Cover, easing = LinearEasing))
-private val PageOut = fadeOut(tween(Motion.Long), targetAlpha = 1f) // stays put and visible until the poster lands
-private val PageBackIn = slideInHorizontally(tween(Motion.Page, easing = Motion.EmphasizedDecelerate)) { -it / 10 }
-private val PageBackOut = slideOutHorizontally(tween(Motion.Page, easing = Motion.EmphasizedAccelerate)) { it / 10 } +
-    fadeOut(tween(Motion.Cover, easing = LinearEasing))
+private val FadeThroughIn = fadeIn(tween(Motion.Medium + 60, 60, Motion.EmphasizedDecelerate)) +
+    scaleIn(tween(Motion.Medium + 60, 60, Motion.EmphasizedDecelerate), initialScale = 0.92f)
+private val FadeThroughOut = fadeOut(tween(Motion.Medium, 60, Motion.EmphasizedAccelerate))
+// Cinematic page transitions: slide from side with parallax + fade for premium feel.
+private val PageIn = slideInHorizontally(tween(Motion.Page + 80, 80, Motion.EmphasizedDecelerate)) { it / 8 } +
+    fadeIn(tween(Motion.Page + 80, 80, LinearEasing))
+private val PageOut = fadeOut(tween(Motion.Page + 80, 80, Motion.EmphasizedAccelerate)) +
+    slideOutHorizontally(tween(Motion.Page + 80, 80, Motion.EmphasizedAccelerate)) { it / 8 }
+private val PageBackIn = slideInHorizontally(tween(Motion.Page + 80, 80, Motion.EmphasizedDecelerate)) { -it / 8 } +
+    fadeIn(tween(Motion.Page + 80, 80, LinearEasing))
+private val PageBackOut = slideOutHorizontally(tween(Motion.Page + 80, 80, Motion.EmphasizedAccelerate)) { it / 8 } +
+    fadeOut(tween(Motion.Page + 80, 80, Motion.EmphasizedAccelerate))
 
 private fun AnimatedContentTransitionScope<NavBackStackEntry>.involvesOverlay() =
     initialState.isOverlay() || targetState.isOverlay()

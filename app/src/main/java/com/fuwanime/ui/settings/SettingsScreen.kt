@@ -107,6 +107,7 @@ import com.fuwanime.data.LibraryRepository
 import com.fuwanime.data.local.AppSettings
 import com.fuwanime.data.local.SettingsStore
 import com.fuwanime.data.local.ThemeMode
+import com.fuwanime.ui.components.ThemeModeToggle
 import com.fuwanime.util.fuwaViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -223,19 +224,14 @@ fun SettingsRoute(onBack: () -> Unit, onOpenLegal: (String) -> Unit) {
             item {
                 Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                     Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                        Icon(Icons.Rounded.DarkMode, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(end = 16.dp, start = 8.dp))
+                        Icon(Icons.Rounded.DarkMode, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(end = 16.dp, start = 8.dp))
                         Text(stringResource(R.string.mine_theme), style = MaterialTheme.typography.bodyLarge)
                     }
-                    SingleChoiceSegmentedButtonRow(Modifier.padding(top = 12.dp)) {
-                        val modes = listOf(ThemeMode.SYSTEM to stringResource(R.string.mine_theme_system), ThemeMode.LIGHT to stringResource(R.string.mine_theme_light), ThemeMode.DARK to stringResource(R.string.mine_theme_dark))
-                        modes.forEachIndexed { i, (mode, label) ->
-                            SegmentedButton(
-                                selected = s.themeMode == mode,
-                                onClick = { vm.update { setThemeMode(mode) } },
-                                shape = SegmentedButtonDefaults.itemShape(i, modes.size),
-                            ) { Text(label) }
-                        }
-                    }
+                    ThemeModeToggle(
+                        currentMode = s.themeMode,
+                        onModeChange = { mode -> vm.update { setThemeMode(mode) } },
+                        modifier = Modifier.padding(top = 12.dp),
+                    )
                 }
             }
             item {

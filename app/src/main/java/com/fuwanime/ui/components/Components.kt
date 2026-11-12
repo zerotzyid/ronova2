@@ -689,20 +689,29 @@ fun PulseIndicator(
     color: Color = MaterialTheme.colorScheme.primary,
     size: Dp = 8.dp,
 ) {
-    val transition = rememberInfiniteTransition(label = "pulse")
-    val alpha by transition.animateFloat(
-        initialValue = if (LocalReduceMotion.current) 1f else 0.4f,
-        targetValue = if (LocalReduceMotion.current) 1f else 1f,
-        animationSpec = infiniteRepeatable(
-            animationSpec = tween(1000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse,
-            label = "pulseAlpha",
-        ),
-    )
-    Box(
-        modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(color.copy(alpha = alpha)),
-    )
+    if (LocalReduceMotion.current) {
+        Box(
+            modifier
+                .size(size)
+                .clip(CircleShape)
+                .background(color),
+        )
+    } else {
+        val transition = rememberInfiniteTransition(label = "pulse")
+        val alpha by transition.animateFloat<Float>(
+            initialValue = 0.4f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animationSpec = tween(1000, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+                label = "pulseAlpha",
+            ),
+        )
+        Box(
+            modifier
+                .size(size)
+                .clip(CircleShape)
+                .background(color.copy(alpha = alpha)),
+        )
+    }
 }

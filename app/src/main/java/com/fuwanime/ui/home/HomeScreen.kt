@@ -34,7 +34,9 @@ import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -843,7 +845,7 @@ private fun PosterGrid(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             if (skeleton) {
-                itemsIndexed(12) { index ->
+                items(12) { index ->
                     PosterSkeleton(width = 150.dp)
                 }
             } else {
